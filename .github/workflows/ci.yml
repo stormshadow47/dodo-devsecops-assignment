@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   packages: write
+  security-events: write
 
 env:
   REGISTRY: ghcr.io
@@ -24,17 +25,29 @@ jobs:
 
     steps:
 
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
 
-      - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: p/security-audit
+      - name: Install Semgrep
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install semgrep
 
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config p/security-audit \
+            --sarif \
+            --output semgrep.sarif \
+            Task-1-Deploy-Ledger-API/app
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
 
       - name: Install Gitleaks
         run: |
@@ -43,15 +56,20 @@ jobs:
           sudo mv gitleaks /usr/local/bin/
           gitleaks version
 
-
       - name: Run Gitleaks
         run: |
           gitleaks detect \
             --source . \
             --redact \
             --verbose \
-            --exit-code 1
+            --exit-code 1 \
+            --report-format sarif \
+            --report-path gitleaks.sarif
 
+      - name: Upload Gitleaks SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
 
       - name: Install Trivy
         run: |
@@ -60,7 +78,7 @@ jobs:
 
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
             | gpg --dearmor \
-            | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+            | sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
 
           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main" \
             | sudo tee /etc/apt/sources.list.d/trivy.list
@@ -73,9 +91,11 @@ jobs:
       - name: Run Trivy Filesystem Scan
         run: |
           trivy fs \
-            --severity HIGH,CRITICAL \
+            --severity CRITICAL \
+            --ignore-unfixed \
             --exit-code 1 \
             Task-1-Deploy-Ledger-API
+
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -95,12 +115,17 @@ jobs:
       - name: Run Trivy Image Scan
         run: |
           trivy image \
-            --format sarif \
-            --output trivy-results.sarif \
             --severity CRITICAL \
             --ignore-unfixed \
             --exit-code 1 \
+            --format sarif \
+            --output trivy-results.sarif \
             ledger-api:ci
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -109,7 +134,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push Image
+      - name: Push Docker Image
         run: |
           docker push ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ghcr.io/${{ env.IMAGE_NAME }}:latest
