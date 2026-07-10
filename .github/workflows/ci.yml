@@ -38,7 +38,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
 
       - name: Run Trivy Filesystem Scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: fs
           scan-ref: ./Task-1-Deploy-and-Harden-Workload
