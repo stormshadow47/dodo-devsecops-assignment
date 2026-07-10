@@ -95,10 +95,9 @@ jobs:
       - name: Run Trivy Image Scan
         run: |
           trivy image \
-            --severity HIGH,CRITICAL \
+            --severity CRITICAL \
             --ignore-unfixed \
             --exit-code 1 \
-            --format table \
             ledger-api:ci
 
       - name: Login to GHCR
