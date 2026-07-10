@@ -1,0 +1,7 @@
+title = "Repository Gitleaks Configuration"
+
+[allowlist]
+paths = [
+  '''.*04-sealedsecret.yaml''',
+  '''.*sealedsecret.*'''
+]
