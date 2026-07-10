@@ -48,8 +48,8 @@ jobs:
       - name: Build and Push Image
         uses: docker/build-push-action@v6
         with:
-          context: ./Task-1-Deploy-and-Harden-Workload/app
-          file: ./Task-1-Deploy-and-Harden-Workload/app/Dockerfile
+          context: ./Task-1-Deploy-Ledger-API/app
+          file: ./Task-1-Deploy-Ledger-API/app/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:latest
