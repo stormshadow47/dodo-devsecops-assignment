@@ -95,6 +95,8 @@ jobs:
       - name: Run Trivy Image Scan
         run: |
           trivy image \
+            --format sarif \
+            --output trivy-results.sarif \
             --severity CRITICAL \
             --ignore-unfixed \
             --exit-code 1 \
