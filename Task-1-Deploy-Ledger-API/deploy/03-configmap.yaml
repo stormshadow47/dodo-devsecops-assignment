@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ledger-api-config
+  namespace: payments
+data:
+  LOG_LEVEL: "info"
+  PORT: "8080"
+  VAULT_VERIFY_URL: ""
+  DATABASE_PATH: "/tmp/ledger-api.db"

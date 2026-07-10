@@ -1,0 +1,127 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-root-user
+  annotations:
+    policies.kyverno.io/title: Disallow Root User
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: check-runAsNonRoot
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Containers must run as non-root (applies to containers and initContainers)"
+        pattern:
+          spec:
+            # =(initContainers) uses optional-match: only validates if initContainers exist
+            =(initContainers):
+              - securityContext:
+                  runAsNonRoot: true
+            containers:
+              - securityContext:
+                  runAsNonRoot: true
+    - name: check-runAsUser
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Containers must not run as user 0 (root)"
+        pattern:
+          spec:
+            =(initContainers):
+              - securityContext:
+                  runAsUser: "!0"
+            containers:
+              - securityContext:
+                  runAsUser: "!0"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+  annotations:
+    policies.kyverno.io/title: Disallow Latest Tag
+    policies.kyverno.io/category: Supply Chain
+    policies.kyverno.io/severity: medium
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-image-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Images must specify a tag (cannot use :latest or no tag)"
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:latest"
+                  - key: "{{ contains(element.image, ':') }}"
+                    operator: Equals
+                    value: false
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-signed-images
+  annotations:
+    policies.kyverno.io/title: Require Signed Images
+    policies.kyverno.io/category: Supply Chain
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Requires all ledger-api and reporting images to be signed via cosign
+      keyless signing through GitHub Actions OIDC. Images must be signed and
+      the signature must be verifiable against the Sigstore public-good Rekor
+      transparency log. Update the subject to match your actual GitHub org/repo
+      and workflow path before enforcing in production.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: verify-image-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/acme-payments/ledger-api:*"
+          mutateDigest: true
+          required: true
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "https://github.com/acme-payments/ledger-api/.github/workflows/release.yaml@refs/heads/main"
+        - imageReferences:
+            - "ghcr.io/acme-payments/reporting:*"
+          mutateDigest: true
+          required: true
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "https://github.com/acme-payments/reporting/.github/workflows/release.yaml@refs/heads/main"

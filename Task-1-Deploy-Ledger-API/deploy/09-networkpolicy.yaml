@@ -1,0 +1,126 @@
+# ──────────────────────────────────────────────────────────────
+# NetworkPolicy — zero-trust networking for the payments namespace
+#
+# Default posture: deny ALL ingress and egress.
+# Each policy below carves out the minimum required traffic flow.
+# ──────────────────────────────────────────────────────────────
+
+# 1. Default deny all ingress traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: payments
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+
+---
+# 2. Default deny all egress traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: payments
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+
+---
+# 3. Allow DNS egress for ALL pods in the namespace
+#    Required for service discovery and external DNS resolution.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: payments
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# 4. Allow ingress to ledger-api from the ingress controller only
+#    The nginx ingress controller runs in the ingress-nginx namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-ledger-api
+  namespace: payments
+spec:
+  podSelector:
+    matchLabels:
+      app: ledger-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+
+---
+# 5. Allow ingress to reporting from within the payments namespace
+#    (ledger-api or other services in the same namespace can reach it)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-reporting
+  namespace: payments
+spec:
+  podSelector:
+    matchLabels:
+      app: reporting
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+
+---
+# 6. Allow egress from ledger-api to the tokenization vault (HTTPS)
+#    In production, restrict the `to` block to the vault's specific CIDR.
+#    For local dev this allows port 443 to any destination.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ledger-api-vault-egress
+  namespace: payments
+spec:
+  podSelector:
+    matchLabels:
+      app: ledger-api
+  policyTypes:
+    - Egress
+  egress:
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+# 7. Allow egress from reporting — only DNS (already covered by policy 3)
+#    Reporting has no external dependencies, so no additional egress rules.
+#    This policy is intentionally absent; the default-deny + DNS policy
+#    already restrict reporting to DNS-only egress.
