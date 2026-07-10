@@ -75,7 +75,7 @@ jobs:
           trivy fs \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
-            Task-1-Deploy-and-Harden-Workload
+            Task-1-Deploy-Ledger-API
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
