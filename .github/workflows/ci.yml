@@ -131,13 +131,59 @@ jobs:
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.*" \
             ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
 
-      - name: Verify Provenance Attestation
+      - name: Create SLSA Provenance Predicate
+        run: |
+          cat > predicate.json <<EOF
+          {
+            "_type": "https://in-toto.io/Statement/v1",
+            "subject": [
+              {
+                "name": "ghcr.io/${{ env.IMAGE_NAME }}",
+                "digest": {
+                  "sha256": "${{ steps.build.outputs.digest }}"
+                }
+              }
+            ],
+            "predicateType": "https://slsa.dev/provenance/v1",
+            "predicate": {
+              "buildDefinition": {
+                "buildType": "https://github.com/docker/build-push-action",
+                "externalParameters": {
+                  "repository": "${{ github.repository }}",
+                  "ref": "${{ github.ref }}"
+                }
+              },
+              "runDetails": {
+                "builder": {
+                  "id": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Attach SLSA Attestation
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign attest \
+            --yes \
+            --predicate predicate.json \
+            --type slsaprovenance \
+            ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+
+
+      - name: Verify SLSA Attestation
+        env:
+          COSIGN_EXPERIMENTAL: "true"
         run: |
           cosign verify-attestation \
             --type slsaprovenance \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.*" \
             ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+
+
 
 
   provenance:
