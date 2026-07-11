@@ -432,6 +432,9 @@ git commit -m "Scale Ledger API"
 
 git push origin main
 ```
+Pipeline run link:
+https://github.com/stormshadow47/dodo-devsecops-assignment/actions/runs/29139708256
+
 
 ArgoCD detects the new commit and synchronizes the cluster.
 
