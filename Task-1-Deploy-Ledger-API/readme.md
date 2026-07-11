@@ -61,6 +61,7 @@ Once the script completes successfully, the following components are available i
 
 ## Deployment Components
 
+```
   Manifest                 Purpose
   ------------------------ --------------------------
   namespace.yaml           Namespace
@@ -74,6 +75,7 @@ Once the script completes successfully, the following components are available i
   neighbour.yaml           Reporting service
   networkpolicy.yaml       Network isolation
   kyverno-policies.yaml    Admission control
+```
 
 The deployment is fully automated, allowing the environment to be recreated consistently with a single command.
 
