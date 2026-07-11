@@ -2,8 +2,6 @@
 
 ## Overview
 
-This repository contains my implementation of the Dodo Payments Security & DevSecOps assessment.
-
 The project focuses on securing a Kubernetes workload, implementing a secure CI/CD pipeline with supply chain security controls, and adopting GitOps using ArgoCD.
 
 ## Repository Structure
