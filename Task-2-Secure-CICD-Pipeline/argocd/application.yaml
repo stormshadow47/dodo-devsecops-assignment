@@ -7,13 +7,13 @@ metadata:
 
 spec:
   project: default
-  spec:
-    ignoreDifferences:
-      - group: kyverno.io
-        kind: ClusterPolicy
-        managedFieldsManagers:
-          - kyverno
-        jsonPointers:
+
+  ignoreDifferences:
+    - group: kyverno.io
+      kind: ClusterPolicy
+      managedFieldsManagers:
+        - kyverno
+      jsonPointers:
         - /status
         - /metadata/generation
         - /metadata/resourceVersion
