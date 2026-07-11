@@ -83,8 +83,4 @@ Secrets are encrypted using Sealed Secrets.
 Kyverno enforces admission policies for workload security.
 ArgoCD provides GitOps-based deployment, drift detection, and self-healing.
 
-Due to time constraints, documentation created for:
-
-- Task 3 - Service Mesh & Zero-Trust (Istio)
-- Task 4 - Reconnaissance & Penetration Testing
 
