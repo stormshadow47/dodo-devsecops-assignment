@@ -20,7 +20,6 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/ledger-api
 
 jobs:
-
   build-security-scan:
 
     runs-on: ubuntu-latest
@@ -51,7 +50,6 @@ jobs:
             --redact \
             --verbose \
             --exit-code 1
-
 
       - name: Install Trivy
         run: |
@@ -85,8 +83,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-
       - name: Build and Push Docker Image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: ./Task-1-Deploy-Ledger-API/app
@@ -104,6 +102,7 @@ jobs:
             --exit-code 1 \
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
@@ -112,8 +111,7 @@ jobs:
           COSIGN_EXPERIMENTAL: "true"
         run: |
           cosign sign --yes \
-            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
+            ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
 
       - name: Verify Signature
         env:
@@ -122,9 +120,4 @@ jobs:
           cosign verify \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.*" \
-            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Generate Provenance
-        uses: slsa-framework/slsa-github-generator/actions/generator@v2
-        with:
-          base64-subjects: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ github.sha }}"
+            ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
