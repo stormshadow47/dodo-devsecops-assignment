@@ -327,6 +327,41 @@ Task-1-Deploy-Ledger-API/deploy/
 ```
 
 
+
+# Security Gate Policies
+
+The CI/CD pipeline follows a fail-fast approach for high-risk security issues while allowing lower-risk findings to be reviewed without blocking delivery.
+
+| Security Gate | Tool | Fail Policy |
+|---------------|------|-------------|
+| Static Application Security Testing (SAST) | Semgrep | **Hard Block** on High or Critical findings. Medium and Low findings generate warnings for review. |
+| Secret Detection | Gitleaks | **Hard Block** if any secrets or credentials are detected in the repository. |
+| Filesystem Vulnerability Scan | Trivy (Filesystem) | **Hard Block** on Critical vulnerabilities. High and Medium vulnerabilities are reviewed before deployment. |
+| Container Image Vulnerability Scan | Trivy (Image) | **Hard Block** on Critical vulnerabilities in the built image. High and Medium findings are reviewed and tracked. |
+| Image Signing | Cosign Keyless | **Hard Block** if image signing or signature verification fails. Unsigned images are never published. |
+| Kubernetes Admission Control | Kyverno | **Hard Block** if workloads violate cluster policies (unsigned images, running as root, or using the `latest` image tag). Non-compliant resources are rejected by the Kubernetes API Server. |
+
+---
+
+## Handling Vulnerabilities with No Available Fix
+
+If Trivy reports a vulnerability for which no upstream fix currently exists, the pipeline follows a risk-based approach instead of automatically ignoring the finding.
+
+1. Verify that no patched package or base image is available.
+2. Assess the vulnerability's severity and exploitability within the application's context.
+3. Document the accepted risk and the justification.
+4. Continue monitoring upstream releases for a fix.
+5. Upgrade the affected dependency or base image as soon as a patched version becomes available.
+
+This approach ensures that deployments are not indefinitely blocked by vulnerabilities that cannot currently be remediated while maintaining visibility and accountability for accepted risks.
+
+
+
+
+
+
+
+
 ## Demonstrating GitOps
 
 After the application synchronizes successfully, the dashboard should display:
@@ -443,3 +478,5 @@ ArgoCD detects the new commit and synchronizes the cluster.
 The deployment is updated automatically.
 
 This demonstrates that **Git is the single source of truth**, and all desired state changes are performed through version-controlled manifests rather than direct cluster modifications.
+
+
