@@ -18,11 +18,11 @@ admission control. The deployment is fully automated using a single
 
 ## Design Decisions
 
--   ConfigMaps store non-sensitive configuration.
 -   Sealed Secrets are used as it works by using asymmetric cryptography. This model is effective when you manage a single cluster controller.
--   Secrets were written as plaintext in the app- decided to tokenize the app before writing to DB and only the last 4digits are revealed.
+-   Secrets were written as plaintext in the app- decided to tokenize the app before writing to DB and only the last 4digits are revealed, ensuring PCI compliance.
 -   A better approach would be to store secrets in an external secret manager/ESO and a managed DB to store tokenized PAN and transaction metadata, if needed.
--   Deployment Automation: The entire environment is provisioned through a single setup.sh entry point. This script orchestrates cluster creation, image build, TLS generation, workload deployment, and post-deployment validation, 
+-   Deployment Automation: The entire environment is provisioned through a single setup.sh entry point. This script orchestrates cluster creation, image build, TLS generation, workload deployment, and post-deployment validation.
+-   ConfigMaps store non-sensitive configuration.
 -   Kyverno enforces security guardrails at admission time.
 -   Resource requests/limits and health probes improve reliability.
 
