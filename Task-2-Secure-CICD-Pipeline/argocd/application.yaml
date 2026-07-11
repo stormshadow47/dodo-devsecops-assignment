@@ -14,7 +14,11 @@ spec:
         managedFieldsManagers:
           - kyverno
         jsonPointers:
-          - /status
+        - /status
+        - /metadata/generation
+        - /metadata/resourceVersion
+        - /metadata/uid
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
 
   source:
     repoURL: https://github.com/stormshadow47/dodo-devsecops-assignment.git
