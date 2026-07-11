@@ -78,9 +78,9 @@ Implemented:
 - GHCR
 
 ### Notes:
-Images are signed using Cosign keyless signing with GitHub OIDC.
-Secrets are encrypted using Sealed Secrets.
-Kyverno enforces admission policies for workload security.
-ArgoCD provides GitOps-based deployment, drift detection, and self-healing.
+- Images are signed using Cosign keyless signing with GitHub OIDC.
+- Secrets are encrypted using Sealed Secrets.
+- Kyverno enforces admission policies for workload security.
+- ArgoCD provides GitOps-based deployment, drift detection, and self-healing.
 
 
