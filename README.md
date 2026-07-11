@@ -63,8 +63,7 @@ Implemented:
 - Self Healing
 
 Due to time constraints, documentation created for:
-Task 3 - Service Mesh & Zero-Trust (Istio)
-Task 4 - Reconnaissance & Penetration Testing
-Sealed Secrets
-Python
-Flask
+
+- Task 3 - Service Mesh & Zero-Trust (Istio)
+- Task 4 - Reconnaissance & Penetration Testing
+
