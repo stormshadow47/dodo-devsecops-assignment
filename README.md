@@ -1,4 +1,4 @@
-### Dodo Payments – Security & DevOps Assessment
+# Dodo Payments – Security & DevOps Assessment
 
 This repository contains my solution for the Dodo Payments Security & DevSecOps Engineer Technical Assessment. The assignment focuses on securing a Kubernetes workload, building a secure software supply chain, and adopting GitOps practices.
 
