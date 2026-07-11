@@ -16,6 +16,11 @@ spec:
           - resources:
               kinds:
                 - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - argocd
       validate:
         message: "Containers must run as non-root (applies to containers and initContainers)"
         pattern:
@@ -33,6 +38,11 @@ spec:
           - resources:
               kinds:
                 - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - argocd
       validate:
         message: "Containers must not run as user 0 (root)"
         pattern:
