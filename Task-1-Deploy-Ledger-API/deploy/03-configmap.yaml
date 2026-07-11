@@ -6,5 +6,4 @@ metadata:
 data:
   LOG_LEVEL: "info"
   PORT: "8080"
-  VAULT_VERIFY_URL: ""
   DATABASE_PATH: "/tmp/ledger-api.db"

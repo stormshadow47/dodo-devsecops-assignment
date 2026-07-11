@@ -44,21 +44,11 @@ spec:
                 secretKeyRef:
                   name: ledger-api-secrets
                   key: VAULT_AUTH_KEY
-            - name: VAULT_VERIFY_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: ledger-api-config
-                  key: VAULT_VERIFY_URL
             - name: LOG_LEVEL
               valueFrom:
                 configMapKeyRef:
                   name: ledger-api-config
                   key: LOG_LEVEL
-            - name: PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: ledger-api-config
-                  key: PORT
             - name: DATABASE_PATH
               valueFrom:
                 configMapKeyRef:
