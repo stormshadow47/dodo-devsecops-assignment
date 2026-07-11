@@ -83,28 +83,6 @@ The deployment is fully automated, allowing the environment to be recreated cons
 ./deploy/scripts/status.sh
 ```
 
-
-## Setup
-
-Clone the repository:
-
-```bash
-git clone <repository-url>
-cd dodo-devsecops-assignment
-```
-
-Run the complete deployment:
-
-```bash
-cd Task-1-Deploy-Ledger-API
-chmod +x setup.sh
-./setup.sh
-```
-
-The script provisions the Kubernetes cluster, builds the application and deploys all Kubernetes resources
-
-
-
 ## Running the mock-vault
 
 ``` bash
@@ -128,8 +106,6 @@ set -a
 source .env.local
 set +a
 ```
-
-## Running the Mock Vault
 
 ``` bash
 ./startup.sh
