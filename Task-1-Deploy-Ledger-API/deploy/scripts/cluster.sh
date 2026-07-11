@@ -11,7 +11,7 @@ kind delete cluster --name ledger-api || true
 
 kind create cluster \
   --name ledger-api \
-  --config deploy/kind-config.yaml
+  --config cluster/kind-config.yaml
 
 echo
 echo "Installing NGINX Ingress..."
