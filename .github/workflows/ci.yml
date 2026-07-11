@@ -131,6 +131,14 @@ jobs:
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.*" \
             ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
 
+      - name: Verify Provenance Attestation
+        run: |
+          cosign verify-attestation \
+            --type slsaprovenance \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.*" \
+            ghcr.io/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+
 
   provenance:
     name: Generate SLSA Provenance
