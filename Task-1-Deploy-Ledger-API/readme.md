@@ -116,11 +116,18 @@ The Vault listens on `http://localhost:8081`.
 ## Tokenize a PAN
 
 ``` bash
-curl -X POST http://localhost:8081/tokenize \
+curl -X POST http://127.0.0.1:8092/v1/tokens/tokenize \
   -H "Authorization: Bearer $VAULT_AUTH_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"pan":"4242424242424242"}'
+  -d '{"pan":"xxxxxxxxxxxx4422"}'
 ```
+
+
+<img width="1389" height="115" alt="Screenshot From 2026-07-11 17-41-30" src="https://github.com/user-attachments/assets/217b82e3-68c6-437d-b555-7b9cef234a6f" />
+
+
+
+
 
 Example response:
 
@@ -133,20 +140,19 @@ Example response:
 Replace `<YOUR_LEDGER_ENDPOINT>` with your application's endpoint.
 
 ``` bash
-curl -X POST http://localhost:8080/<YOUR_LEDGER_ENDPOINT> \
-  -H "Content-Type: application/json" \
-  -d '{
-    "token":"tok_3d9f4d9c1b4e7a21",
-    "metadata":{
-      "customer_id":"cust-1001",
-      "merchant_id":"merchant-001",
-      "order_id":"order-5001",
-      "amount":1999,
-      "currency":"USD",
-      "description":"Demo payment"
-    }
+curl -k -X POST https://<YOUR_LEDGER_ENDPOINT>/transactions   -H "Content-Type: application/json"   -d '{
+    "token":"tok_477bba133c182267",
+    "last4":"4242",
+    "amount":1999,
+    "currency":"USD",
+    "status":"authorized"
   }'
 ```
+
+<img width="1446" height="159" alt="Screenshot From 2026-07-11 17-53-04" src="https://github.com/user-attachments/assets/93877285-faf5-401a-890b-70e73303fd20" />
+
+
+
 
 The Ledger API receives only a token and business metadata; the original
 PAN never reaches the application.
