@@ -12,12 +12,15 @@ on:
 permissions:
   contents: read
   packages: write
+  security-events: write
+  id-token: write
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/ledger-api
 
 jobs:
+
   build-security-scan:
 
     runs-on: ubuntu-latest
@@ -29,12 +32,10 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Run Semgrep
         uses: semgrep/semgrep-action@v1
         with:
           config: p/security-audit
-
 
       - name: Install Gitleaks
         run: |
@@ -42,7 +43,6 @@ jobs:
           tar -xzf gitleaks_8.24.3_linux_x64.tar.gz
           sudo mv gitleaks /usr/local/bin/
           gitleaks version
-
 
       - name: Run Gitleaks
         run: |
@@ -60,15 +60,13 @@ jobs:
 
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
             | gpg --dearmor \
-            | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+            | sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
 
           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main" \
             | sudo tee /etc/apt/sources.list.d/trivy.list
 
           sudo apt-get update
           sudo apt-get install -y trivy
-
-          trivy --version
 
       - name: Run Trivy Filesystem Scan
         run: |
@@ -80,15 +78,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker Image
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: ./Task-1-Deploy-Ledger-API/app
           file: ./Task-1-Deploy-Ledger-API/app/Dockerfile
-          load: true
-          push: false
+          push: true
           tags: |
-            ledger-api:ci
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ghcr.io/${{ env.IMAGE_NAME }}:latest
 
@@ -98,16 +102,29 @@ jobs:
             --severity CRITICAL \
             --ignore-unfixed \
             --exit-code 1 \
-            ledger-api:ci
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
 
-      - name: Push Image
+      - name: Sign Image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
         run: |
-          docker push ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          docker push ghcr.io/${{ env.IMAGE_NAME }}:latest
+          cosign sign --yes \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+
+      - name: Verify Signature
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/.*" \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Generate Provenance
+        uses: slsa-framework/slsa-github-generator/actions/generator@v2
+        with:
+          base64-subjects: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ github.sha }}"
