@@ -1,4 +1,4 @@
-<img width="3356" height="965" alt="Screenshot From 2026-07-11 09-42-48" src="https://github.com/user-attachments/assets/f0845c65-b348-42de-a4de-4dcbc2158f2e" /># Task 2 – Secure CI/CD Pipeline & GitOps
+# Task 2 – Secure CI/CD Pipeline & GitOps
 
 ## Overview
 
@@ -61,7 +61,7 @@ The pipeline performs automated security validation before publishing container 
 
 ## Design Decisions
 
-# Cosign Keyless Signing
+### Cosign Keyless Signing
 
 Container images are signed using Sigstore Cosign with GitHub OIDC.
 
@@ -75,14 +75,14 @@ Identity is verified using:
 
 ---
 
-# Supply Chain Attestation
+### Supply Chain Attestation
 
 After signing, Cosign generates a provenance attestation attached to the image.
 
 This provides cryptographically verifiable build metadata.
 
 
-# GitOps
+### GitOps
 
 Deployment is managed by ArgoCD.
 
@@ -92,7 +92,7 @@ Manual changes inside the cluster are automatically detected and reconciled.
 
 ---
 
-# Prerequisites
+## Prerequisites
 
 Install:
 
@@ -215,11 +215,11 @@ ghcr.io/<github-user>/ledger-api@sha256:<digest>
 ---
 
 
-# Installing and Configuring ArgoCD
+## Installing and Configuring ArgoCD
 
 ArgoCD is used to implement GitOps by continuously reconciling the Kubernetes cluster with the desired state stored in Git.
 
-## 1. Create the ArgoCD Namespace
+### 1. Create the ArgoCD Namespace
 
 ```bash
 kubectl create namespace argocd
@@ -227,7 +227,7 @@ kubectl create namespace argocd
 
 ---
 
-## 2. Install ArgoCD
+### 2. Install ArgoCD
 
 ```bash
 kubectl apply -n argocd \
@@ -259,7 +259,7 @@ argocd-server                                     1/1     Running
 
 ---
 
-## 3. Expose the ArgoCD API Server
+### 3. Expose the ArgoCD API Server
 
 For local development:
 
@@ -277,7 +277,7 @@ https://localhost:8081
 
 ---
 
-## 4. Retrieve the Initial Admin Password
+### 4. Retrieve the Initial Admin Password
 
 ```bash
 kubectl -n argocd get secret argocd-initial-admin-secret \
@@ -300,7 +300,7 @@ Password:
 
 ---
 
-## 5. Create the Application
+### 5. Create the Application
 
 Apply the GitOps Application manifest.
 
@@ -315,7 +315,7 @@ kubectl get applications -n argocd
 ```
 
 
-# ArgoCD Application
+## ArgoCD Application
 
 The Application points to the deployment manifests stored in Git.
 
@@ -327,7 +327,7 @@ Task-1-Deploy-Ledger-API/deploy/
 ```
 
 
-# Demonstrating GitOps
+## Demonstrating GitOps
 
 After the application synchronizes successfully, the dashboard should display:
 
@@ -339,7 +339,7 @@ Health: Healthy
 
 ---
 
-# Demonstrating Drift Detection
+## Demonstrating Drift Detection
 
 Modify the running deployment directly inside the cluster.
 
@@ -348,7 +348,9 @@ For example:
 
 <img width="3356" height="965" alt="Screenshot From 2026-07-11 09-48-45" src="https://github.com/user-attachments/assets/bc9c3d45-b4b9-406e-a52a-768aece6e7ff" />
 
+
 Healthy, Synced, replicas=5.
+
 
 After this command:
 ```bash
@@ -357,10 +359,13 @@ kubectl scale deployment ledger-api \
 -n payments
 ```
 
+
 <img width="3356" height="965" alt="Screenshot From 2026-07-11 09-54-58" src="https://github.com/user-attachments/assets/e3b9c2d9-f762-4a16-8831-317f4e015d78" />
 
 
+
 Refresh the ArgoCD UI.
+
 
 The application will transition to:
 
@@ -368,11 +373,12 @@ The application will transition to:
 OutOfSync
 ```
 
+
 because the live cluster no longer matches the desired state stored in Git.
 
 ---
 
-# Demonstrating Self-Healing
+## Demonstrating Self-Healing
 
 Enable Auto Sync (already configured in the Application).
 
@@ -388,6 +394,7 @@ The deployment is restored to:
 ```
 Replicas = 5
 ```
+
 
 The application status returns to:
 
@@ -405,7 +412,7 @@ No manual Kubernetes intervention is required.
 
 ---
 
-# Demonstrating Git as the Source of Truth
+## Demonstrating Git as the Source of Truth
 
 Modify the deployment manifest in Git.
 
