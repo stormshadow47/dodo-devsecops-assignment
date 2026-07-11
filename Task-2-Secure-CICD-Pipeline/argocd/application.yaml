@@ -8,11 +8,13 @@ metadata:
 spec:
   project: default
   spec:
-  ignoreDifferences:
-    - group: kyverno.io
-      kind: ClusterPolicy
-      managedFieldsManagers:
-        - kyverno
+    ignoreDifferences:
+      - group: kyverno.io
+        kind: ClusterPolicy
+        managedFieldsManagers:
+          - kyverno
+        jsonPointers:
+          - /status
 
   source:
     repoURL: https://github.com/stormshadow47/dodo-devsecops-assignment.git
