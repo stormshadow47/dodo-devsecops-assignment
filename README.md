@@ -65,17 +65,17 @@ Implemented:
 
 ## Technologies Used
 
-Kubernetes
-Docker
-GitHub Actions
-ArgoCD
-Kyverno
-Trivy
-Semgrep
-Gitleaks
-Cosign
-Sealed Secrets
-GHCR
+- Kubernetes
+- Docker
+- GitHub Actions
+- ArgoCD
+- Kyverno
+- Trivy
+- Semgrep
+- Gitleaks
+- Cosign
+- Sealed Secrets
+- GHCR
 
 ### Notes:
 Images are signed using Cosign keyless signing with GitHub OIDC.
