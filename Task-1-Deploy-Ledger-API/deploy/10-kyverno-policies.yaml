@@ -16,6 +16,7 @@ spec:
           - resources:
               kinds:
                 - Pod
+      skipBackgroundRequests: true          
       exclude:
         any:
           - resources:
@@ -38,6 +39,7 @@ spec:
           - resources:
               kinds:
                 - Pod
+      skipBackgroundRequests: true          
       exclude:
         any:
           - resources:
@@ -112,7 +114,7 @@ spec:
                 - Pod
       verifyImages:
         - imageReferences:
-            - "ghcr.io/acme-payments/ledger-api:*"
+            - "ghcr.io/stormshadow47/ledger-api:*"
           mutateDigest: true
           required: true
           attestors:
@@ -122,16 +124,4 @@ spec:
                     rekor:
                       url: "https://rekor.sigstore.dev"
                     issuer: "https://token.actions.githubusercontent.com"
-                    subject: "https://github.com/acme-payments/ledger-api/.github/workflows/release.yaml@refs/heads/main"
-        - imageReferences:
-            - "ghcr.io/acme-payments/reporting:*"
-          mutateDigest: true
-          required: true
-          attestors:
-            - count: 1
-              entries:
-                - keyless:
-                    rekor:
-                      url: "https://rekor.sigstore.dev"
-                    issuer: "https://token.actions.githubusercontent.com"
-                    subject: "https://github.com/acme-payments/reporting/.github/workflows/release.yaml@refs/heads/main"
+                    subject: https://github.com/stormshadow47/dodo-devsecops-assignment/.github/workflows/ci.yml@refs/heads/main"
