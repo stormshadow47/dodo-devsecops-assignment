@@ -23,6 +23,10 @@ jobs:
   build-security-scan:
 
     runs-on: ubuntu-latest
+    
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}   
 
     steps:
 
@@ -93,7 +97,7 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ghcr.io/${{ env.IMAGE_NAME }}:latest
-            
+
       - name: Export Image
         id: image
         run: |
@@ -142,6 +146,7 @@ jobs:
     with:
       image: ${{ needs.build-security-scan.outputs.image }}
       digest: ${{ needs.build-security-scan.outputs.digest }}
+      registry-username: ${{ github.actor }}
 
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
