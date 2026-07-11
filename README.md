@@ -1,21 +1,22 @@
 # Dodo Payments – Security & DevOps Assessment
 
-This repository contains my solution for the Dodo Payments Security & DevSecOps Engineer Technical Assessment. The assignment focuses on securing a Kubernetes workload, building a secure software supply chain, and adopting GitOps practices.
+## Overview
+
+This repository contains my implementation of the Dodo Payments Security & DevSecOps Engineer assessment.
+
+The project focuses on securing a Kubernetes workload, implementing a secure CI/CD pipeline with supply chain security controls, and adopting GitOps using ArgoCD.
 
 ## Repository Structure
 
 ```
 .
 ├── Task-1-Deploy-Ledger-API/
-│   ├── deploy/
-│   └── README.md
+│   ├── app/
+│   └── deploy/
 │
-├── Task-2-Secure-CICD-Pipeline/
-│   ├── .github/workflows/
-│   ├── argocd/
-│   └── README.md
-│
-└── README.md
+└── Task-2-Secure-CICD-Pipeline/
+    ├── .github/workflows/
+    └── argocd/
 ```
 
 
@@ -61,6 +62,26 @@ Implemented:
 - Automatic Sync
 - Drift Detection
 - Self Healing
+
+## Technologies Used
+
+Kubernetes
+Docker
+GitHub Actions
+ArgoCD
+Kyverno
+Trivy
+Semgrep
+Gitleaks
+Cosign
+Sealed Secrets
+GHCR
+
+### Notes:
+Images are signed using Cosign keyless signing with GitHub OIDC.
+Secrets are encrypted using Sealed Secrets.
+Kyverno enforces admission policies for workload security.
+ArgoCD provides GitOps-based deployment, drift detection, and self-healing.
 
 Due to time constraints, documentation created for:
 
